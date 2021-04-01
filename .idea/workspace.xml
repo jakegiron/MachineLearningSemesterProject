@@ -20,6 +20,16 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\MyData\School\CS 487 Machine Learning\MachineLearningSemesterProject" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\MyData\School\CS 487 Machine Learning\MachineLearningSemesterProject" />
+    </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -29,7 +39,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1612890783530</updated>
-      <workItem from="1612890795417" duration="106000" />
+      <workItem from="1612890795417" duration="677000" />
+      <workItem from="1614284469585" duration="10000" />
+      <workItem from="1617300359654" duration="1752000" />
     </task>
     <servers />
   </component>
@@ -37,9 +49,17 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="395" y="42" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1612890883446">
+    <state x="395" y="42" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1617300381001">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state x="395" y="42" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1920.0.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1612890883446" />
+    <state x="395" y="42" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1920.0.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1617300381001" />
+    <state x="1220" y="298" key="FileChooserDialogImpl" timestamp="1617300524360">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="1220" y="298" key="FileChooserDialogImpl/-1920.0.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1617300524360" />
+    <state x="638" y="188" key="SettingsEditor" timestamp="1617301471854">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="638" y="188" key="SettingsEditor/-1920.0.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1617301471854" />
   </component>
 </project>
