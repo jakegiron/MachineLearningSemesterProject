@@ -20,7 +20,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -28,6 +28,7 @@
       <recent name="D:\MyData\School\CS 487 Machine Learning\MachineLearningSemesterProject" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\MyData\School\CS 487 Machine Learning\MachineLearningSemesterProject\data" />
       <recent name="D:\MyData\School\CS 487 Machine Learning\MachineLearningSemesterProject" />
     </key>
   </component>
@@ -41,7 +42,7 @@
       <updated>1612890783530</updated>
       <workItem from="1612890795417" duration="677000" />
       <workItem from="1614284469585" duration="10000" />
-      <workItem from="1617300359654" duration="1752000" />
+      <workItem from="1617300359654" duration="2432000" />
     </task>
     <servers />
   </component>

@@ -1,90 +1,110 @@
-from datetime import datetime, date
-import numpy as np
 import pandas as pd
-import os
-import re
-
-date_anomalies = np.array([])
+from datetime import datetime
+from sklearn.neighbors import KDTree
 
 
-def load_raw_data(file_path, csv_copy=False, csv_title=None):
-    print('file: ', file_path)
+def load_data():
+    dateparse = lambda x: datetime.strptime(x, '%Y-%m-%d')
+    raw_data_df = pd.read_csv('oldData/mesilla_aquifer_data.csv',
+                              index_col=False,
+                              parse_dates=['Date'],
+                              date_parser=dateparse)
+    raw_data_df.columns = ['id', 'date', 'wl', 'precip', 'mean_temp']
+    raw_data_df['date'] = raw_data_df['date'].apply(lambda x: x.strftime('%Y-%m-01'))
+    return raw_data_df
 
-    df_raw = pd.read_csv(file_path,
-                         index_col=False)
 
-    df = df_raw[['Time',
-                 'SiteNo',
-                 'Water level in feet relative to NAVD88',
-                 'Depth to Water Below Land Surface in ft.',
-                 ]]
+def combine_duplicate_month_entries(df):
+    for i in range(len(df) - 1):
+        df.update(df, overwrite=True)
 
-    # TODO: Need to add: precipitation, temperature, and coordinates,
-    df = df.rename(columns={'Time': 'Date'})
-    df = df.rename(columns={'SiteNo': 'well_id'})
-    df = df.rename(columns={'Water level in feet relative to NAVD88': 'wl'})
-    df = df.rename(columns={'Depth to Water Below Land Surface in ft.': 'dtw'})
+        if df.loc[i].id == df.loc[i + 1].id:
+            if df.loc[i].date == df.loc[i + 1].date:
+                avg_wl = sum([df.loc[i].wl, df.loc[i + 1].wl]) / 2
+                sum_precipitation_to_ft = (df.loc[i].precip + df.loc[i + 1].precip) / 12
+                avg_temp = sum([df.loc[i].mean_temp, df.loc[i + 1].mean_temp]) / 2
 
-    if csv_copy:
-        create_csv(df, csv_title)
+                df.loc[df.index == i + 1, 'wl'] = avg_wl
+                df.loc[df.index == i + 1, 'precip'] = sum_precipitation_to_ft
+                df.loc[df.index == i + 1, 'mean_temp'] = avg_temp
+
+                df = df.drop(i)
     return df
 
 
-def create_csv(df, csv_title):
-    df.to_csv(csv_title, index=False)
-
-
-def clean_dates(df):
-    df['Date'] = df.Date.astype(str)
-    df['Date'] = df['Date'].apply(clean_dates_one)
-    df = clean_dates_two()
-    df.to_csv('data_fixed_dates.csv', index=False)
-
-
-def clean_dates_one(one_date):
-    if re.search('\d{4}-\d{2}-\d{2}', one_date):
-        pos = re.search('\d{4}-\d{2}-\d{2}', one_date).end()
-
-        return one_date[:pos]
-
-    else:
-        np.append(date_anomalies, one_date)
-        return one_date
-
-
-def clean_dates_two():
-    for x in date_anomalies:
-        df = df[df.Date != x]
+def pivot_table_and_clean_dates(raw):
+    df = raw.pivot_table(index='date', columns=["id"], values=['wl', 'precip', 'mean_temp']) \
+        .reorder_levels([1, 0], axis=1) \
+        .sort_index(axis=1)
+    #  Don't ever delete this!!!
+    df.index = pd.to_datetime(df.index).date
+    idx = pd.date_range('1985-01-01', '2014-12-01')
+    mask = idx.day == 1
+    idx = idx[mask].date
+    df = df.reindex(idx)
+    df = df.dropna(axis='columns', thresh=276)
     return df
 
 
-def load_data(file):
-    dateparser = lambda x: datetime.strptime(x, '%Y-%m-%d')
-    df = pd.read_csv(file,
-                     index_col=False,
-                     parse_dates=['Date'],
-                     date_parser=dateparser)
-
-    df['wl'] = df.wl.astype(float)
-    df['dtw'] = df.dtw.astype(float)
+def clean_values(df):
+    df = df.iloc[:-60, :]
+    df = df.interpolate(method='linear')
     return df
 
 
-def pivot_dataframe(df, all_data):
-    if all_data:
-        df = df.pivot_table(index='Date', columns=["well_id"],
-                            # values=['dtw', 'wl', 'P_ft', 'Temp_mean_F'])
-                            values=['dtw', 'wl']) \
-            .reorder_levels([1, 0], axis=1) \
-            .sort_index(axis=1)
-    else:
-        df = df.pivot_table(index='Date', columns=["Well_ID"], values=['WL_elev_ft']) \
-            .reorder_levels([1, 0], axis=1) \
-            .sort_index(axis=1)
-    return df
+def save_clean_data(df):
+    dft = df.stack(level=0).reset_index()
+    dft.columns = ['date', 'id', 'mean_temp', 'precip', 'wl']
+    dft['date'] = pd.to_datetime(dft['date'])
+    dft['id'] = dft['id'].astype(str)
+    dft = dft.reindex(columns=['id', 'date', 'wl', 'mean_temp', 'precip'])
+    dft.to_csv('clean_waterlevel_data.csv', index=False)
 
 
-def remove_data(df):
-    df.dropna(axis='columns', thresh=1090, inplace=True)
-    df.dropna(axis='index', thresh=1, inplace=True)
-    return df
+def see_well_df_info(df_elong, thesh):
+    dft_piv = pivot_table(df_elong)
+    dft_piv = clean_dates(dft_piv, thesh)
+
+    dft = dft_piv.stack(level=0).reset_index()
+    dft.columns = ['date', 'id', 'mean_temp', 'precip', 'wl']
+    dft['date'] = pd.to_datetime(dft['date'])
+    dft['id'] = dft['id'].astype(str)
+    print('thresh: ', thesh)
+    print('data shape: ', dft_piv.shape)
+    print('unique wells:', len(dft.id.unique()))
+    print('Nan count:', dft_piv.isna().sum().sum())
+    print('\n')
+
+
+def pivot_table(raw):
+    df_r = raw.pivot_table(index='date', columns=["id"], values=['wl', 'precip', 'mean_temp']) \
+        .reorder_levels([1, 0], axis=1) \
+        .sort_index(axis=1)
+    return df_r
+
+
+def clean_dates(df_r, thresh):
+    df_r.index = pd.to_datetime(df_r.index).date
+    idx = pd.date_range('1985-01-01', '2014-12-01')
+    mask = idx.day == 1
+    idx = idx[mask].date
+    df_r = df_r.reindex(idx)
+    df_r = df_r.dropna(axis='columns', thresh=thresh)
+    return df_r
+
+
+def get_nearest_data(well_coor, target_well, df):
+    all_pts = well_coor[['x', 'y']].values
+    target_pts = well_coor.loc[target_well].values
+    tree = KDTree(all_pts)
+    d, i = tree.query([(target_pts[0], target_pts[1])], k=3)
+    well_names = well_coor.index.values[i[0, 0]], well_coor.index.values[i[0, 1]], well_coor.index.values[i[0, 2]]
+
+    df_1 = df.loc[:, [well_names[0], well_names[1], well_names[2]]]
+
+    df_2 = df_1.drop((well_names[1], 'precip'), axis=1)
+    df_2 = df_2.drop((well_names[1], 'mean_temp'), axis=1)
+    df_2 = df_2.drop((well_names[2], 'precip'), axis=1)
+    df_2 = df_2.drop((well_names[2], 'mean_temp'), axis=1)
+    df_2['trend'] = df
+    return df_2, well_names
